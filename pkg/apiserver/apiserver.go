@@ -32,6 +32,7 @@ import (
 	"github.com/jetstack/navigator/pkg/apis/navigator/v1alpha1"
 	informers "github.com/jetstack/navigator/pkg/client/informers/internalversion"
 	esclusterstorage "github.com/jetstack/navigator/pkg/registry/navigator/escluster"
+	leaderlockstorage "github.com/jetstack/navigator/pkg/registry/navigator/leaderlock"
 	pilotstorage "github.com/jetstack/navigator/pkg/registry/navigator/pilot"
 )
 
@@ -116,10 +117,15 @@ func (c completedConfig) New() (*NavigatorServer, error) {
 	if err != nil {
 		return nil, err
 	}
+	leaderLockStorage, err := leaderlockstorage.NewREST(Scheme, c.GenericConfig.RESTOptionsGetter)
+	if err != nil {
+		return nil, err
+	}
 	v1alpha1storage["elasticsearchclusters"] = escStorage
 	v1alpha1storage["elasticsearchclusters/status"] = escStatusStorage
 	v1alpha1storage["pilots"] = pilotStorage
 	v1alpha1storage["pilots/status"] = pilotStatusStorage
+	v1alpha1storage["leaderlocks"] = leaderLockStorage
 	apiGroupInfo.VersionedResourcesStorageMap["v1alpha1"] = v1alpha1storage
 
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
