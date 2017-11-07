@@ -17,4 +17,6 @@ package v1alpha1
 
 type ElasticsearchClusterExpansion interface{}
 
+type LeaderLockExpansion interface{}
+
 type PilotExpansion interface{}

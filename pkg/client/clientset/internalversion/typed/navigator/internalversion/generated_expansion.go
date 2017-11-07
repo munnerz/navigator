@@ -17,4 +17,6 @@ package internalversion
 
 type ElasticsearchClusterExpansion interface{}
 
+type LeaderLockExpansion interface{}
+
 type PilotExpansion interface{}

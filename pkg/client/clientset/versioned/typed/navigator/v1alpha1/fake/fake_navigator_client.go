@@ -29,6 +29,10 @@ func (c *FakeNavigatorV1alpha1) ElasticsearchClusters(namespace string) v1alpha1
 	return &FakeElasticsearchClusters{c, namespace}
 }
 
+func (c *FakeNavigatorV1alpha1) LeaderLocks(namespace string) v1alpha1.LeaderLockInterface {
+	return &FakeLeaderLocks{c, namespace}
+}
+
 func (c *FakeNavigatorV1alpha1) Pilots(namespace string) v1alpha1.PilotInterface {
 	return &FakePilots{c, namespace}
 }

@@ -25,6 +25,7 @@ import (
 type NavigatorV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	ElasticsearchClustersGetter
+	LeaderLocksGetter
 	PilotsGetter
 }
 
@@ -35,6 +36,10 @@ type NavigatorV1alpha1Client struct {
 
 func (c *NavigatorV1alpha1Client) ElasticsearchClusters(namespace string) ElasticsearchClusterInterface {
 	return newElasticsearchClusters(c, namespace)
+}
+
+func (c *NavigatorV1alpha1Client) LeaderLocks(namespace string) LeaderLockInterface {
+	return newLeaderLocks(c, namespace)
 }
 
 func (c *NavigatorV1alpha1Client) Pilots(namespace string) PilotInterface {

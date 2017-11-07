@@ -26,6 +26,8 @@ import (
 type Interface interface {
 	// ElasticsearchClusters returns a ElasticsearchClusterInformer.
 	ElasticsearchClusters() ElasticsearchClusterInformer
+	// LeaderLocks returns a LeaderLockInformer.
+	LeaderLocks() LeaderLockInformer
 	// Pilots returns a PilotInformer.
 	Pilots() PilotInformer
 }
@@ -43,6 +45,11 @@ func New(f internalinterfaces.SharedInformerFactory, filter internalinterfaces.F
 // ElasticsearchClusters returns a ElasticsearchClusterInformer.
 func (v *version) ElasticsearchClusters() ElasticsearchClusterInformer {
 	return &elasticsearchClusterInformer{factory: v.factory, filter: v.filter}
+}
+
+// LeaderLocks returns a LeaderLockInformer.
+func (v *version) LeaderLocks() LeaderLockInformer {
+	return &leaderLockInformer{factory: v.factory, filter: v.filter}
 }
 
 // Pilots returns a PilotInformer.

@@ -26,6 +26,14 @@ type ElasticsearchClusterListerExpansion interface{}
 // ElasticsearchClusterNamespaceLister.
 type ElasticsearchClusterNamespaceListerExpansion interface{}
 
+// LeaderLockListerExpansion allows custom methods to be added to
+// LeaderLockLister.
+type LeaderLockListerExpansion interface{}
+
+// LeaderLockNamespaceListerExpansion allows custom methods to be added to
+// LeaderLockNamespaceLister.
+type LeaderLockNamespaceListerExpansion interface{}
+
 // PilotListerExpansion allows custom methods to be added to
 // PilotLister.
 type PilotListerExpansion interface{}
