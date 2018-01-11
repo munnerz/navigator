@@ -300,7 +300,6 @@ func autoConvert_v1alpha1_ElasticsearchClusterNodePool_To_navigator_Elasticsearc
 	if err := Convert_v1alpha1_ElasticsearchClusterPersistenceConfig_To_navigator_ElasticsearchClusterPersistenceConfig(&in.Persistence, &out.Persistence, s); err != nil {
 		return err
 	}
-	out.Config = *(*map[string]string)(unsafe.Pointer(&in.Config))
 	return nil
 }
 
@@ -318,7 +317,6 @@ func autoConvert_navigator_ElasticsearchClusterNodePool_To_v1alpha1_Elasticsearc
 	if err := Convert_navigator_ElasticsearchClusterPersistenceConfig_To_v1alpha1_ElasticsearchClusterPersistenceConfig(&in.Persistence, &out.Persistence, s); err != nil {
 		return err
 	}
-	out.Config = *(*map[string]string)(unsafe.Pointer(&in.Config))
 	return nil
 }
 
@@ -372,8 +370,6 @@ func Convert_navigator_ElasticsearchClusterPersistenceConfig_To_v1alpha1_Elastic
 }
 
 func autoConvert_v1alpha1_ElasticsearchClusterSpec_To_navigator_ElasticsearchClusterSpec(in *ElasticsearchClusterSpec, out *navigator.ElasticsearchClusterSpec, s conversion.Scope) error {
-	out.Plugins = *(*[]string)(unsafe.Pointer(&in.Plugins))
-	out.NodePools = *(*[]navigator.ElasticsearchClusterNodePool)(unsafe.Pointer(&in.NodePools))
 	if err := Convert_v1alpha1_ElasticsearchPilotImage_To_navigator_ElasticsearchPilotImage(&in.Pilot, &out.Pilot, s); err != nil {
 		return err
 	}
@@ -381,6 +377,9 @@ func autoConvert_v1alpha1_ElasticsearchClusterSpec_To_navigator_ElasticsearchClu
 		return err
 	}
 	out.Sysctl = *(*[]string)(unsafe.Pointer(&in.Sysctl))
+	out.Plugins = *(*[]string)(unsafe.Pointer(&in.Plugins))
+	out.NodePools = *(*[]navigator.ElasticsearchClusterNodePool)(unsafe.Pointer(&in.NodePools))
+	out.MinimumMasters = in.MinimumMasters
 	return nil
 }
 
@@ -390,8 +389,6 @@ func Convert_v1alpha1_ElasticsearchClusterSpec_To_navigator_ElasticsearchCluster
 }
 
 func autoConvert_navigator_ElasticsearchClusterSpec_To_v1alpha1_ElasticsearchClusterSpec(in *navigator.ElasticsearchClusterSpec, out *ElasticsearchClusterSpec, s conversion.Scope) error {
-	out.Plugins = *(*[]string)(unsafe.Pointer(&in.Plugins))
-	out.NodePools = *(*[]ElasticsearchClusterNodePool)(unsafe.Pointer(&in.NodePools))
 	if err := Convert_navigator_ElasticsearchPilotImage_To_v1alpha1_ElasticsearchPilotImage(&in.Pilot, &out.Pilot, s); err != nil {
 		return err
 	}
@@ -399,6 +396,9 @@ func autoConvert_navigator_ElasticsearchClusterSpec_To_v1alpha1_ElasticsearchClu
 		return err
 	}
 	out.Sysctl = *(*[]string)(unsafe.Pointer(&in.Sysctl))
+	out.Plugins = *(*[]string)(unsafe.Pointer(&in.Plugins))
+	out.NodePools = *(*[]ElasticsearchClusterNodePool)(unsafe.Pointer(&in.NodePools))
+	out.MinimumMasters = in.MinimumMasters
 	return nil
 }
 
