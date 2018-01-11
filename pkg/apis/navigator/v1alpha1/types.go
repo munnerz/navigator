@@ -146,7 +146,7 @@ type ElasticsearchPilotImage struct {
 
 type ElasticsearchImage struct {
 	ImageSpec `json:",inline"`
-	FsGroup   int64 `json:"fsGroup"`
+	RunAsUser int64 `json:"runAsUser"`
 }
 
 // +genclient

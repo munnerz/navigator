@@ -145,7 +145,8 @@ func elasticsearchPodTemplateSpec(controllerName string, c *v1alpha1.Elasticsear
 			ServiceAccountName:            util.ServiceAccountName(c),
 			NodeSelector:                  np.NodeSelector,
 			SecurityContext: &apiv1.PodSecurityContext{
-				FSGroup: util.Int64Ptr(c.Spec.Image.FsGroup),
+				RunAsUser: util.Int64Ptr(c.Spec.Image.RunAsUser),
+				FSGroup:   util.Int64Ptr(c.Spec.Image.RunAsUser),
 			},
 			Volumes:        volumes,
 			InitContainers: buildInitContainers(c, np),
