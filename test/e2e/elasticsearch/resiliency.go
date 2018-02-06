@@ -2,6 +2,7 @@ package elasticsearch
 
 import (
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
 	"k8s.io/client-go/kubernetes"
 
@@ -11,8 +12,8 @@ import (
 	"github.com/jetstack/navigator/test/e2e/framework"
 )
 
-var _ = Describe("Scale tests", func() {
-	f := framework.NewDefaultFramework("elasticsearch-scale")
+var _ = Describe("Resiliency tests", func() {
+	f := framework.NewDefaultFramework("elasticsearch-resiliency")
 	var ns string
 	var kubeClient kubernetes.Interface
 	var navClient clientset.Interface
@@ -23,7 +24,7 @@ var _ = Describe("Scale tests", func() {
 		ns = f.Namespace.Name
 	})
 
-	framework.NavigatorDescribe("Elasticsearch scaling functionality [ElasticsearchScale]", func() {
+	framework.NavigatorDescribe("Elasticsearch resiliency tests [ElasticsearchResiliency]", func() {
 		clusterName := "test"
 
 		AfterEach(func() {
@@ -36,7 +37,7 @@ var _ = Describe("Scale tests", func() {
 			framework.WaitForNoPodsInNamespace(kubeClient, ns, framework.NamespaceCleanupTimeout)
 		})
 
-		It("should scale up a single node cluster to make it turn green from yellow", func() {
+		It("should continue to serve reads when a single node in a two node cluster fails", func() {
 			nodePoolName := "mixed"
 			cluster := generate.Cluster(generate.ClusterConfig{
 				Name:      clusterName,
@@ -49,7 +50,7 @@ var _ = Describe("Scale tests", func() {
 				NodePools: []v1alpha1.ElasticsearchClusterNodePool{
 					{
 						Name:      nodePoolName,
-						Replicas:  1,
+						Replicas:  2,
 						Resources: framework.DefaultElasticsearchNodeResources(),
 						Roles: []v1alpha1.ElasticsearchClusterRole{
 							v1alpha1.ElasticsearchRoleData,
@@ -61,9 +62,11 @@ var _ = Describe("Scale tests", func() {
 			})
 			tester := framework.NewElasticsearchTester(kubeClient, navClient)
 			cluster = tester.CreateClusterAndWaitForReady(cluster)
-			tester.WaitForHealth(cluster, v1alpha1.ElasticsearchClusterHealthYellow)
-			tester.ScaleNodePool(cluster, nodePoolName, 2)
 			tester.WaitForHealth(cluster, v1alpha1.ElasticsearchClusterHealthGreen)
+			By("Sending a GET / request to the cluster")
+			out, err := tester.QueryCluster(cluster, "/", "GET", "")
+			framework.Logf(out)
+			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 })

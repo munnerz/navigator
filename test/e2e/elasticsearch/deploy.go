@@ -60,7 +60,6 @@ var _ = Describe("Deployment tests", func() {
 			})
 			tester := framework.NewElasticsearchTester(kubeClient, navClient)
 			cluster = tester.CreateClusterAndWaitForReady(cluster)
-			By("Waiting for the cluster to be in a Yellow state")
 			tester.WaitForHealth(cluster, v1alpha1.ElasticsearchClusterHealthYellow)
 		})
 
@@ -95,7 +94,6 @@ var _ = Describe("Deployment tests", func() {
 			})
 			tester := framework.NewElasticsearchTester(kubeClient, navClient)
 			cluster = tester.CreateClusterAndWaitForReady(cluster)
-			By("Waiting for the cluster to be in a Green state")
 			tester.WaitForHealth(cluster, v1alpha1.ElasticsearchClusterHealthGreen)
 			// TODO: ensure documents are being written
 		})
