@@ -18,6 +18,7 @@ import (
 
 	v1alpha1 "github.com/jetstack/navigator/pkg/apis/navigator/v1alpha1"
 	clientset "github.com/jetstack/navigator/pkg/client/clientset/versioned"
+	"github.com/jetstack/navigator/pkg/controllers/elasticsearch/util"
 	esutil "github.com/jetstack/navigator/pkg/controllers/elasticsearch/util"
 )
 
@@ -55,10 +56,84 @@ func DeleteAllElasticsearchClusters(c clientset.Interface, ns string) {
 type ElasticsearchTester struct {
 	kubeClient kubernetes.Interface
 	navClient  clientset.Interface
+
+	execPod *core.Pod
 }
 
 func NewElasticsearchTester(kubeClient kubernetes.Interface, navClient clientset.Interface) *ElasticsearchTester {
-	return &ElasticsearchTester{kubeClient, navClient}
+	return &ElasticsearchTester{kubeClient, navClient, nil}
+}
+
+func (e *ElasticsearchTester) QueryCluster(c *v1alpha1.ElasticsearchCluster, path, method, data string) (string, error) {
+	svcFqdn := util.ClientServiceName(c) + "." + c.Namespace + ".svc.cluster.local:9200"
+	url := svcFqdn + path
+	// TODO: round robin over returned hosts to simulate a real es client
+	return e.ExecPodCurl(url, method, data)
+}
+
+func (e *ElasticsearchTester) ExecPodCurl(url, method, data string) (string, error) {
+	cmd := []string{"curl", "-X" + method}
+	if data != "" {
+		cmd = append(cmd, "-d", data)
+	}
+	cmd = append(cmd, url)
+	return e.RunInExecPod(cmd...)
+}
+
+func (e *ElasticsearchTester) RunInExecPod(cmd ...string) (string, error) {
+	if e.execPod == nil {
+		e.LaunchExecPod()
+	}
+	return RunKubectl(append([]string{"exec",
+		"--namespace", e.execPod.Namespace,
+		"--container", e.execPod.Spec.Containers[0].Name,
+		e.execPod.Name, "--"}, cmd...)...)
+}
+
+func (e *ElasticsearchTester) LaunchExecPod() {
+	var err error
+	e.execPod = buildExecPod("exec-", "default")
+	By("Creating exec pod")
+	e.execPod, err = e.kubeClient.CoreV1().Pods(e.execPod.Namespace).Create(e.execPod)
+	Expect(err).NotTo(HaveOccurred())
+	Logf("Created exec pod %q", e.execPod.Name)
+	err = WaitForPodRunningInNamespace(e.kubeClient, e.execPod)
+	Expect(err).NotTo(HaveOccurred())
+	err = e.initExecPod()
+	Expect(err).NotTo(HaveOccurred())
+}
+
+func (e *ElasticsearchTester) initExecPod() error {
+	By("Installing exec pod utils")
+	output, err := e.RunInExecPod("apk", "add", "--no-cache", "curl")
+	Logf(output)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+const AlpineImage = "alpine:3.6"
+
+func buildExecPod(generateName, ns string) *core.Pod {
+	immediate := int64(0)
+	pod := &core.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: generateName,
+			Namespace:    ns,
+		},
+		Spec: core.PodSpec{
+			TerminationGracePeriodSeconds: &immediate,
+			Containers: []core.Container{
+				{
+					Name:    "exec",
+					Image:   AlpineImage,
+					Command: []string{"sh", "-c", "while true; do sleep 5; done"},
+				},
+			},
+		},
+	}
+	return pod
 }
 
 func (e *ElasticsearchTester) CreateClusterAndWaitForReady(es *v1alpha1.ElasticsearchCluster) *v1alpha1.ElasticsearchCluster {
